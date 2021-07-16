@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+{{>head}}
+<div>
+	<a href="/login"><button>Login</button></a>
+	<a href="/register"><button>Register</button></a>
+</div>
+<div>
+	<form id="todo">
+		<input type="text" id="title" placeholder="Title">
+		<textarea id="description" rows="4" cols="50" placeholder="Description"></textarea>
+		<input type="submit" value="SUBMIT">
+	</form>
+</div>
+<script type="text/javascript">
+	window.addEventListener('DOMContentLoaded',()=>{
+		const todo = document.getElementById('todo');
+		
+		todo.addEventListener('submit',todoSubmit)
+	})
+	async function todoSubmit(event) {
+		event.preventDefault();
+		console.log("submit btn pressed")
+		const title = document.getElementById('title').value;
+		const description = document.getElementById('description').value;
+
+
+		const result = await fetch('/user-data',{
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body:JSON.stringify({
+				title,
+				description
+			})
+		}).then((res) => res.json())
+		if(result.status==="ok"){
+			alert("Success")
+			window.open(window.location.origin,'_self')
+		}else{
+			alert(result.error)
+		}
+	}
+</script>
+{{>footer}}

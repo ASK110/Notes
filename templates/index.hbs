@@ -1,0 +1,110 @@
+<html>
+{{>head}}
+
+<div>
+	<a href="/login"><button>LogOut</button></a>
+</div>
+<div>
+	<form id="todo">
+		<input type="text" id="title" placeholder="Title" required="true">
+		<textarea id="description" rows="4" cols="50" placeholder="Description" required="true"></textarea>
+		<input type="submit" value="SUBMIT">
+	</form>
+	<div>
+		<form id="searchform">
+		<input type="text" id="search" placeholder="Search by Title">
+		<input type="submit" value="search">
+		<table id="notestable">
+			
+		</table>
+	</form> 
+	</div>
+</div>
+<script type="text/javascript">
+	window.addEventListener('DOMContentLoaded',async ()=>{
+		const id = await searchForUser();
+		const todo = document.getElementById('todo');
+		const seaf = document.getElementById('searchform')
+		seaf.addEventListener('submit',(event)=>{
+			fetchList(event,id)
+		})
+		todo.addEventListener('submit',(event)=>{
+			todoSubmit(event,id)
+		})
+	})
+
+	async function fetchList(event,id) {
+		event.preventDefault()
+		let search = document.getElementById('search').value;
+		if(search){
+			console.log(search)
+		}
+		
+		const result = await fetch('/getnotes')
+		.then((res)=>res.json());
+		let sno = 0;
+		document.getElementById('notestable').innerHTML = '<tr><th>SNo.</th><th>Title</th><th>Description</th></tr>'
+		for(let i=0;i<result.length;i++){
+			if(!search){
+				if(result[i].userID===id){
+					sno+=1;
+					document.getElementById('notestable').innerHTML += `<tr><td>${sno}</td><td>${result[i].title}</td><td>${result[i].description}</td></tr>`
+				}
+			}else{
+				if(result[i].userID===id && search === result[i].title){
+					sno+=1;
+					document.getElementById('notestable').innerHTML += `<tr><td>${sno}</td><td>${result[i].title}</td><td>${result[i].description}</td></tr>`
+				}
+			}
+		}
+	}
+
+
+	async function todoSubmit(event,id) {
+		console.log("submit btn pressed")
+		const title = document.getElementById('title').value;
+		const description = document.getElementById('description').value;
+
+		const result = await fetch('/user-notes',{
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body:JSON.stringify({
+				id,
+				title,
+				description
+			})
+		}).then((res) => res.json())
+		if(result.status==="ok"){
+			alert("Success")
+			window.open(window.location.origin,'_self')
+		}else{
+			alert(result.error)
+		}
+	}
+
+	async function searchForUser(){
+		const token = await window.localStorage.getItem('auth');
+		if(token === null){
+			window.open(window.location.origin+'/login','_self')
+		}
+		const result = await fetch('/user-data',{
+			method: "POST",
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body:JSON.stringify({
+				token
+			})
+		}).then((res) => res.json())
+		if(result.status === 'ok'){
+			console.log(result.decode.id)
+			return result.decode.id
+		}else{
+
+		}
+	}
+</script>
+
+{{>footer}}

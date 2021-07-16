@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{{>head}}
+<body>
+	<div>
+		<h1>Register</h1>
+		<form id="registerForm">
+			<input type="text" placeholder="Username" id="username" required="true">
+			<input type="password" placeholder="Password" id="password" required="true">
+			<input type="submit" vaue="Register">
+		</form>
+		<a href="/login"><button>Login</button></a>
+	</div>
+	<script type="text/javascript">
+		window.addEventListener('DOMContentLoaded',()=>{
+			let form = document.getElementById('registerForm')
+			form.addEventListener('submit',registerUser)
+		})
+		async function registerUser(event){
+			event.preventDefault()
+			console.log("register");
+			const username = document.getElementById("username").value;
+			const password = document.getElementById("password").value;
+			const result = await fetch('/user-register',{
+				enctype:"multipart/form-data",
+				method: "POST",
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body:JSON.stringify({
+					username,
+					password
+				})
+			}).then((res) => res.json())
+			if(result.status==="ok"){
+				alert("Success")
+				window.open(window.location.origin+'/login','_self')
+			}else{
+				alert(result.error)
+			}
+		}
+	</script>
+</body>
+{{>footer}}
